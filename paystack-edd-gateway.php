@@ -54,9 +54,6 @@ class EDD_Paystack
 
 		$this->msg = null; //error notices init
 
-		// Paystack transaction verification address
-		$this->verify_url = "https://paystack.ng/charge/verification";
-
 		// The Title shown on the top of the Payment Gateways Page next to all the other Payment Gateways
 		$this->method_title = __( "Paystack.co", 'mm-paystack' );
 
@@ -109,7 +106,7 @@ class EDD_Paystack
 		if (! edd_is_checkout() ) {
 			return;
 		}
-		wp_enqueue_script( 'paystack-inline', '//paystack.ng/js/inline.js');
+		wp_enqueue_script( 'paystack-inline', 'https://js.paystack.co/v1/inline.js');
 		wp_enqueue_script( 'edd-paystacker.js', plugins_url( 'assets/edd-paystacker.js',  __FILE__ ), array( 'paystack-inline' ), $this->version, true );
 		wp_enqueue_script( 'jquery.growl.js', plugins_url( 'assets/jquery.growl.js',  __FILE__ ), array( 'paystack-inline' ), null, true );
 
@@ -125,7 +122,7 @@ class EDD_Paystack
 	*/
 	
 	public function po_paystack_payment_icon( $icons ) {
-		$icons['//paystack.ng/assets/img/paystack-woocommerce.png'] = 'Paystack';
+		$icons[plugins_url( 'assets/paystack-edd.png',  __FILE__ )] = 'Paystack';
 		return $icons;
 	} //end po_paystack_payment_icon()
 
@@ -193,12 +190,6 @@ class EDD_Paystack
 				'type'	=>	'header'
 			),
 			array(
-				'id'	=>	'merchantID',
-				'name'	=>	__( 'Paystack.co Merchant ID', 'po_paystack' ),
-				'desc'	=>	__( 'This is the Merchant ID provided by Paystack.co when you signed up for an account.', 'po_paystack' ),
-				'type'	=>	'text',
-			),
-			array(
 				'id'	=>	'test_public_key',
 				'name'	=>	__( 'Paystack.co Public Key', 'po_paystack' ),
 				'desc'	=>	__( 'This is the Test Public Key provided by Paystack.co when you signed up for an account.', 'po_paystack' ),
@@ -237,8 +228,6 @@ class EDD_Paystack
 	public function process_payment( $purchase_data ) {
 		//edd_options contains the values of the admin settings
 		global $edd_options;
-
-		$paystack_merchantID = $edd_options['merchantID'];
 
 		if (edd_is_test_mode()) {
 			$paystack_public = $edd_options['test_public_key'];
@@ -304,7 +293,7 @@ class EDD_Paystack
 				// Problems? send back
 				edd_send_back_to_checkout( '?payment-mode=' . $purchase_data['post_data']['edd-gateway'] );
 			else:
-				if ( !$order_id || !$paystack_merchantID || !$paystack_public ):
+				if ( !$order_id || !$paystack_public ):
 					edd_record_gateway_error( __( 'Invalid transaction', 'po_paystack' ), sprintf( __( 'Invalid transaction; possible hack attempt. Payment data: %s', 'po_paystack' ), json_encode( $payment_data ) ), $payment );
 					edd_send_back_to_checkout( '?payment-mode=' . $purchase_data['post_data']['edd-gateway'] );
 				endif;
@@ -321,23 +310,30 @@ class EDD_Paystack
 					endif;
 
 					$email = $payment_data['user_email'];
-					$url = $this->verify_url."?trxref=".$txcode."&merchantid=".$paystack_merchantID;
+					require_once dirname(__FILE__) . 'paystack-class/Paystack.php';
+					// Create the library object
+					$paystack = new Paystack( $paystack_secret );
+					list($headers, $body, $code) = $paystack->transaction->verify([
+							'reference'=> $txcode
+						  ]);
+					
+					$resp = $body;
 
-					$request = wp_remote_get($url);
-					$response = wp_remote_retrieve_body($request);
-					var_dump($request);
-					$resp = json_decode($response, true);
-
-					if ($resp["transaction"]["authorization"]["email"]!==$email):
-						$error = "Invalid customer email associated with Transaction code:".$txcode." and Paystack reference: ".$resp["transaction"]['paystack_reference'].". Possible hack attempt.";
+					if (array_key_exists("status", $resp) && !$resp["status"]):
+						$error = "Failed with message from Paystack: " . $resp["message"];
+						edd_insert_payment_note( $order_id, __($error) );
+						edd_update_payment_status( $order_id, 'failed' );
+						throw new Exception( __($error));						
+					elseif ($resp["data"]["customer"]["email"]!==$email):
+						$error = "Invalid customer email associated with Transaction code:".$txcode." and Paystack reference: ".$resp["data"]['reference'].". Possible hack attempt.";
 						edd_insert_payment_note( $order_id, __($error) );
 						edd_update_payment_status( $order_id, 'failed' );
 						throw new Exception( __($error));						
 					else:
 						// Authcode and Authdesc. To be used in future version, for recurrent billing
-						$authcode = $resp["transaction"]["authorization"]["authorization_code"];
-						$authdesc = $resp["transaction"]["authorization"]["description"];
-						$paystackref = $resp["transaction"]["paystack_reference"];						
+						$authcode = $resp["data"]["authorization"]["authorization_code"];
+						$authdesc = $resp["data"]["authorization"]["description"];
+						$paystackref = $resp["data"]["reference"];						
 
 						// Complete the order. once a transaction is successful, set the purchase status to complete
 						edd_update_payment_status( $payment, 'complete' );
@@ -381,7 +377,7 @@ class EDD_Paystack
 	 * Checks if the currency is valid (Nigerian Naira only), as required by gateway. Returns boolean.
 	 *
 	 * @access private
-	 */    
+	 */	
 	private function is_valid_currency(){
 		if( edd_get_currency() !== 'NGN' ){
 			$this->msg = 'Sorry, Paystack.co doesn\'t support your store currency, set it to Nigerian Naira (&#8358;) <a href="' . get_bloginfo('wpurl') . '/wp-admin/admin.php?page=edd-settings&tab=general&section=currency">here</a>';
