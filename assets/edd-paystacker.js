@@ -1,35 +1,20 @@
-jQuery(document).ready(function() {
-  jQuery('form#edd_purchase_form input[name="payment-mode"]').eq(0).prop('checked', true).attr( 'checked', 'checked' );
-  usingPaystack();
-});
-
-jQuery(document).on("change", "form#edd_purchase_form input[name='payment-mode']", function(){
-  if ( 0 === jQuery('form#edd_purchase_form input[name="payment-mode"]' ).filter( ':checked' ).length() ) {
-    jQuery(this).prop('checked', true).attr( 'checked', 'checked' );
-  };
-  usingPaystack();
-});
-
-function usingPaystack(){
-  if(jQuery("form#edd_purchase_form input[name='payment-mode']:checked").attr('id') == 'edd-gateway-paystack'){
+jQuery('form#edd_purchase_form').on('submit', function(e){
+  if(jQuery('input:hidden[name=edd-gateway]').val()=='paystack'){
     console.log("Using paystack");
     jQuery('form#edd_purchase_form').addClass("processing");
-    jQuery('form#edd_purchase_form').on('submit', function(e){
-      cptd = parseInt(jQuery('form#edd_purchase_form #cptd').val());
+  
+      cptd = parseInt(jQuery('#cptd').val());
       if (!cptd){
         payWithPaystack();
         e.preventDefault();
         //e.stopPropagation();
       }else{
         jQuery('form#edd_purchase_form edd-purchase-button').val("Complete Purchase");
-        //jQuery('form[name="checkout"] ul.payment_methods, form[name="checkout"] .login-form-checkout, form[name="checkout"] .coupon-form-checkout').hide();
       }
-    });
   }else{
     console.log("Not using Paystack. Carry on");
-    jQuery('form#edd_purchase_form').unbind('submit');
   };
-}
+});
 
 function payWithPaystack(){
   var paystack = {};
