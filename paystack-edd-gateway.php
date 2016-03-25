@@ -310,7 +310,7 @@ class EDD_Paystack
 					endif;
 
 					$email = $payment_data['user_email'];
-					require_once dirname(__FILE__) . 'paystack-class/Paystack.php';
+					require_once dirname(__FILE__) . '/paystack-class/Paystack.php';
 					// Create the library object
 					$paystack = new Paystack( $paystack_secret );
 					list($headers, $body, $code) = $paystack->transaction->verify([
