@@ -16,6 +16,18 @@ jQuery('form#edd_purchase_form').on('submit', function(e){
   };
 });
 
+function generatePaystackREF(){
+      var d = new Date().getTime();
+      if(window.performance && typeof window.performance.now === "function"){
+        d += performance.now(); //use high-precision timer if available
+      }
+      var ref = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+      });
+      return ref;
+    }
 function payWithPaystack(){
   var paystack = {};
   paystack['email'] = jQuery('form#edd_purchase_form #edd-email').val();
@@ -32,7 +44,7 @@ function payWithPaystack(){
       key: paystack.key,
       email: paystack.email,
       amount: paystack.amount,
-      ref: paystack.ref,
+      ref: paystack.ref+'-'+generatePaystackREF(),
       callback: function(response){
         console.log(response);
         jQuery('form#edd_purchase_form #txcode').val(response.trxref);
