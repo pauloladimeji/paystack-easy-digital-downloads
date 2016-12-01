@@ -309,7 +309,7 @@ class EDD_Paystack
 						throw new Exception( __($error));
 					endif;
 
-					$email = $payment_data['user_email'];
+					$email = strtolower($payment_data['user_email']);
 					require_once dirname(__FILE__) . '/paystack-class/Paystack.php';
 					// Create the library object
 					$paystack = new Paystack( $paystack_secret );
@@ -324,7 +324,7 @@ class EDD_Paystack
 						edd_insert_payment_note( $order_id, __($error) );
 						edd_update_payment_status( $order_id, 'failed' );
 						throw new Exception( __($error));						
-					elseif ($resp["data"]["customer"]["email"]!==$email):
+					elseif (strtolower($resp["data"]["customer"]["email"])!==$email):
 						$error = "Invalid customer email associated with Transaction code:".$txcode." and Paystack reference: ".$resp["data"]['reference'].". Possible hack attempt.";
 						edd_insert_payment_note( $order_id, __($error) );
 						edd_update_payment_status( $order_id, 'failed' );
