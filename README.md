@@ -1,4 +1,4 @@
-# Paystack.co Gateway for Easy Digital Downloads
+# Paystack.com Gateway for Easy Digital Downloads
 
 Paystack is a new payment gateway that allows one-off and recurring payments through a slick and easy-to-use interface.
 
