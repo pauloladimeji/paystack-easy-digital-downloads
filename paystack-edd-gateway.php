@@ -1,8 +1,8 @@
 <?php 
 /*
-Plugin Name: Paystack.co Easy Digital Downloads Gateway
+Plugin Name: Paystack.com Easy Digital Downloads Gateway
 Plugin URI: http://www.gospelbox.com.ng/
-Description: Accept payments using the Paystack.co Payment Gateway
+Description: Accept payments using the Paystack.com Payment Gateway
 Version: 1.0.0
 Author: Paul Oladimeji
 Author URI: http://pauloladimeji.me/
@@ -55,10 +55,10 @@ class EDD_Paystack
 		$this->msg = null; //error notices init
 
 		// The Title shown on the top of the Payment Gateways Page next to all the other Payment Gateways
-		$this->method_title = __( "Paystack.co", 'mm-paystack' );
+		$this->method_title = __( "Paystack.com", 'mm-paystack' );
 
 		// The description for this Payment Gateway, shown on the actual Payment options page on the backend
-		$this->method_description = __( "Securely take payments using local and foreign Mastercard, VISA and Verve cards via Paystack.co", 'mm-paystack' );
+		$this->method_description = __( "Securely take payments using local and foreign Mastercard, VISA and Verve cards via Paystack.com", 'mm-paystack' );
 
 		/**
 		 *	admin hooks
@@ -143,7 +143,7 @@ class EDD_Paystack
 	*	@access public
 	*/
 	public function register_gateway( $gateways ) {
-		$gateways['paystack'] = array( 'admin_label' => 'Paystack.co Payment Gateway', 'checkout_label' => __('Paystack: Pay via credit/debit cards', 'po_paystack') );
+		$gateways['paystack'] = array( 'admin_label' => 'Paystack.com Payment Gateway', 'checkout_label' => __('Paystack: Pay via credit/debit cards', 'po_paystack') );
 		return $gateways;
 	}
 
@@ -174,7 +174,7 @@ class EDD_Paystack
 	/**
 	 * init_form_fields function.
 	 *
-	 * Build the admin / settings fields for Paystack.co Gateway
+	 * Build the admin / settings fields for Paystack.com Gateway
 	 *
 	 * @access public
 	 * 
@@ -185,32 +185,32 @@ class EDD_Paystack
 		$paystack_settings = array(
 			array(
 				'id'	=>	'paystack_gateway_settings',
-				'name'	=>	'<h3>' . __('Paystack.co Payment Gateway', 'po_paystack') . '</h3>',
-				'desc'	=>	'<p>' . __('Paystack.co enables you to securely take payments using local and foreign Mastercard, VISA and Verve cards', 'po_paystack') . '</p>',
+				'name'	=>	'<h3>' . __('Paystack.com Payment Gateway', 'po_paystack') . '</h3>',
+				'desc'	=>	'<p>' . __('Paystack.com enables you to securely take payments using local and foreign Mastercard, VISA and Verve cards', 'po_paystack') . '</p>',
 				'type'	=>	'header'
 			),
 			array(
 				'id'	=>	'test_public_key',
-				'name'	=>	__( 'Paystack.co Public Key', 'po_paystack' ),
-				'desc'	=>	__( 'This is the Test Public Key provided by Paystack.co when you signed up for an account.', 'po_paystack' ),
+				'name'	=>	__( 'Paystack.com Public Key', 'po_paystack' ),
+				'desc'	=>	__( 'This is the Test Public Key provided by Paystack.com when you signed up for an account.', 'po_paystack' ),
 				'type'	=>	'text',
 			),
 			array(
 				'id'	=>	'test_secret_key',
-				'name'	=>	__( 'Paystack.co Test Secret Key', 'po_paystack' ),
-				'desc'	=>	__( 'This is the Test Secret Key provided by Paystack.co when you signed up for an account.', 'po_paystack' ),
+				'name'	=>	__( 'Paystack.com Test Secret Key', 'po_paystack' ),
+				'desc'	=>	__( 'This is the Test Secret Key provided by Paystack.com when you signed up for an account.', 'po_paystack' ),
 				'type'	=>	'text',
 			),
 			array(
 				'id'	=>	'live_public_key',
-				'name'	=>	__( 'Paystack.co Live Public Key', 'po_paystack' ),
-				'desc'	=>	__( 'This is the Live Public Key provided by Paystack.co when you activated your account.', 'po_paystack' ),
+				'name'	=>	__( 'Paystack.com Live Public Key', 'po_paystack' ),
+				'desc'	=>	__( 'This is the Live Public Key provided by Paystack.com when you activated your account.', 'po_paystack' ),
 				'type'	=>	'text',
 			),
 			array(
 				'id'	=>	'live_secret_key',
-				'name'	=>	__( 'Paystack.co Live Secret Key', 'po_paystack' ),
-				'desc'	=>	__( 'This is the Live Secret Key provided by Paystack.co when you activated your account.', 'po_paystack' ),
+				'name'	=>	__( 'Paystack.com Live Secret Key', 'po_paystack' ),
+				'desc'	=>	__( 'This is the Live Secret Key provided by Paystack.com when you activated your account.', 'po_paystack' ),
 				'type'	=>	'text',
 			),
 		);
@@ -339,7 +339,7 @@ class EDD_Paystack
 						edd_update_payment_status( $payment, 'complete' );
 
 						// record transaction ID, or any other notes you need
-						edd_insert_payment_note( $payment, "Paystack.co payment completed (using ".strtoupper($authdesc)." and Transaction code:".$txcode.") with Paystack reference:".$paystackref );
+						edd_insert_payment_note( $payment, "Paystack.com payment completed (using ".strtoupper($authdesc)." and Transaction code:".$txcode.") with Paystack reference:".$paystackref );
 						// go to the success page
 						edd_send_to_success_page();
 					endif;
@@ -380,7 +380,7 @@ class EDD_Paystack
 	 */	
 	private function is_valid_currency(){
 		if( edd_get_currency() !== 'NGN' ){
-			$this->msg = 'Sorry, Paystack.co doesn\'t support your store currency, set it to Nigerian Naira (&#8358;) <a href="' . get_bloginfo('wpurl') . '/wp-admin/admin.php?page=edd-settings&tab=general&section=currency">here</a>';
+			$this->msg = 'Sorry, Paystack.com doesn\'t support your store currency, set it to Nigerian Naira (&#8358;) <a href="' . get_bloginfo('wpurl') . '/wp-admin/admin.php?page=edd-settings&tab=general&section=currency">here</a>';
 			return false;
 		}
 		return true;
